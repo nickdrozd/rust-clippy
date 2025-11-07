@@ -18,6 +18,7 @@ use rustc_hir::{
 };
 use rustc_lint::{LateContext, LateLintPass};
 use rustc_middle::hir::nested_filter;
+use rustc_middle::ty;
 use rustc_session::declare_lint_pass;
 use rustc_span::SyntaxContext;
 
@@ -399,6 +400,10 @@ impl<'tcx> LateLintPass<'tcx> for OptionIfLetElse {
 
         let detection = detect_option_if_let_else(cx, expr).or_else(|| detect_option_match(cx, expr));
         if let Some(det) = detection {
+            if det.method_sugg == "map_or_else" && matches!(cx.typeck_results().expr_ty(expr).kind(), ty::Ref(..)) {
+                return;
+            }
+
             span_lint_and_sugg(
                 cx,
                 OPTION_IF_LET_ELSE,

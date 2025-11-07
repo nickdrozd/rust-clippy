@@ -398,3 +398,22 @@ fn issue15002() {
         Err(_) => String::new(),
     };
 }
+
+mod test_option_ref {
+    struct X;
+
+    impl X {
+        fn my_vec(&self) -> Vec<u8> {
+            vec![2]
+        }
+
+        fn check_vec(&self, vec: Option<&Vec<u8>>) {
+            let vec = match vec {
+                Some(vec) => vec,
+                None => &self.my_vec(),
+            };
+
+            assert_eq!(vec, &vec![3]);
+        }
+    }
+}
